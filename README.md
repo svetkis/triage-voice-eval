@@ -236,8 +236,8 @@ Shows one test case with all persona results side-by-side:
 ```python
 from triage_voice_eval.reports import generate_case_report
 
-for case_id, persona_results in run_result.results.items():
-    print(generate_case_report(case_id, persona_results))
+for case_id in run_result.results:
+    print(generate_case_report(case_id, run_result))
 ```
 
 Output:

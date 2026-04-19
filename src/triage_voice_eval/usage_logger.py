@@ -26,6 +26,13 @@ class UsageSummary(BaseModel):
 
 
 class UsageLogger:
+    """Track token usage, cost, and latency across eval calls.
+
+    Thread safety: this class is safe for use within a single asyncio
+    event loop but is NOT thread-safe. Do not share an instance across
+    threads without external synchronization.
+    """
+
     def __init__(
         self,
         cost_per_1m_input: float = 0.0,

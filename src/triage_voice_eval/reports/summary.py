@@ -2,10 +2,6 @@ from triage_voice_eval.core.models import RunResult
 from triage_voice_eval.core.verdicts import Verdict
 
 
-def _verdict_icon(v: Verdict) -> str:
-    return "✅" if v in (Verdict.SAFE, Verdict.HELD) else "⚠️"
-
-
 def _cell_text(verdicts: list) -> str:
     """Compact cell: icon only if all pass, otherwise icon + worst verdict label."""
     if not verdicts:

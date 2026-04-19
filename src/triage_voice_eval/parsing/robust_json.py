@@ -11,6 +11,12 @@ def parse(text: str, fallback: dict | None = None) -> tuple[dict, bool]:
 
     Returns (parsed_dict, is_fallback).
     is_fallback=True means parsing failed and fallback was returned.
+
+    Warning: when JSON is truncated (stage 4), string values may be
+    incomplete. For safety-critical fields (e.g. ``advice``), a truncated
+    non-empty string will appear truthy — which may cause guards like
+    CrisisGuard to report LEAK on partial data. Callers should check
+    is_fallback before trusting field values in safety decisions.
     """
     # Stage 1: direct parse
     result = _try_loads(text)
@@ -91,7 +97,12 @@ def _extract_json_object(text: str) -> str | None:
 
 
 def _repair_truncated(text: str) -> str | None:
-    """Attempt to repair truncated JSON by closing unclosed structures."""
+    """Attempt to repair truncated JSON by closing unclosed structures.
+
+    Warning: repaired strings may contain incomplete values.
+    E.g. ``"advice": "Call 911 imme`` becomes ``"advice": "Call 911 imme"``.
+    The value is syntactically valid but semantically truncated.
+    """
     start = text.find("{")
     if start == -1:
         return None

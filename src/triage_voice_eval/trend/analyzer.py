@@ -40,13 +40,21 @@ class TrendAnalyzer:
         self.runs_dir = Path(runs_dir)
 
     def load_runs(self) -> list[tuple[str, RunResult]]:
-        """Load all runs from runs_dir, sorted by directory name."""
+        """Load all runs from runs_dir, sorted by directory name.
+
+        Corrupted or unreadable result files are skipped with a warning.
+        """
+        import warnings
+
         runs: list[tuple[str, RunResult]] = []
         for run_dir in sorted(self.runs_dir.iterdir()):
             result_path = run_dir / "result.json"
             if run_dir.is_dir() and result_path.exists():
-                run_result = RunResult.model_validate_json(result_path.read_text())
-                runs.append((run_dir.name, run_result))
+                try:
+                    run_result = RunResult.model_validate_json(result_path.read_text())
+                    runs.append((run_dir.name, run_result))
+                except Exception as exc:
+                    warnings.warn(f"Skipping {run_dir.name}: {exc}")
         return runs
 
     def detect_regressions(self) -> list[Regression]:

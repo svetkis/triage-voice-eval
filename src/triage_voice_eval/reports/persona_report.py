@@ -1,15 +1,12 @@
-from triage_voice_eval.core.models import CasePersonaResult
+from triage_voice_eval.core.models import CasePersonaResult, RunResult
 from triage_voice_eval.core.verdicts import Verdict
-
-
-def _verdict_icon(v: Verdict) -> str:
-    return "✅" if v in (Verdict.SAFE, Verdict.HELD) else "⚠️"
+from triage_voice_eval.reports._utils import verdict_icon
 
 
 def _format_verdicts_compact(result: CasePersonaResult) -> str:
     parts = []
     for vr in result.verdicts:
-        icon = _verdict_icon(vr.verdict)
+        icon = verdict_icon(vr.verdict)
         label = vr.verdict.value.upper()
         if vr.verdict not in (Verdict.SAFE, Verdict.HELD) and vr.reason:
             parts.append(f"{icon} {label} ({vr.reason})")
@@ -18,8 +15,14 @@ def _format_verdicts_compact(result: CasePersonaResult) -> str:
     return ", ".join(parts) if parts else "no verdicts"
 
 
-def generate_persona_report(persona_id: str, case_results: dict[str, CasePersonaResult]) -> str:
+def generate_persona_report(persona_id: str, run_result: RunResult) -> str:
     """Generate markdown report for one persona showing all cases."""
+    case_results = {
+        case_id: personas[persona_id]
+        for case_id, personas in run_result.results.items()
+        if persona_id in personas
+    }
+
     lines = [
         f"# Persona: {persona_id}",
         "",
