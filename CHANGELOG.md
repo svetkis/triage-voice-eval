@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - `EvalRunner.run` no longer mutates the dict returned by `pipeline_fn` — optional
   `_tokens` / `_cost` keys are read from a shallow copy.
+- `RunResult.timestamp` is now `datetime` (was `str`). Pydantic serializes
+  it to ISO-8601 in JSON. Legacy files with `"timestamp": ""` are still
+  accepted via a validator that maps them to `datetime.min` (UTC).
+- `TrendAnalyzer.load_runs` now sorts by `result.timestamp` (with directory
+  name as a deterministic tie-breaker), not by directory name alone.
 
 ### Removed (BREAKING)
 - `Persona.prompt_files` and `Persona.model_config_override` — unused stubs
