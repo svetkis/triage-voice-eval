@@ -448,7 +448,7 @@ Each `TestCase` has:
 
 ## Links
 
-- [triage-and-voice](https://github.com/<placeholder>/triage-and-voice) — reference implementation of the pattern this eval framework is designed for
+- [triage-and-voice](https://github.com/svetkis/triage-and-voice) — reference implementation of the pattern this eval framework is designed for
 - [Why your LLM product hallucinates the one thing it shouldn't](https://substack.com/home/post/p-193325003) — article explaining the problem and pattern
 
 ---
