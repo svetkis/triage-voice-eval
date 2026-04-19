@@ -1,15 +1,12 @@
-from triage_voice_eval.core.models import CasePersonaResult
+from triage_voice_eval.core.models import CasePersonaResult, RunResult
 from triage_voice_eval.core.verdicts import Verdict
-
-
-def _verdict_icon(v: Verdict) -> str:
-    return "✅" if v in (Verdict.SAFE, Verdict.HELD) else "⚠️"
+from triage_voice_eval.reports._utils import verdict_icon
 
 
 def _format_verdicts(result: CasePersonaResult) -> str:
     parts = []
     for vr in result.verdicts:
-        icon = _verdict_icon(vr.verdict)
+        icon = verdict_icon(vr.verdict)
         parts.append(f"{icon} {vr.verdict.value.upper()} ({vr.guard_name})")
     return ", ".join(parts) if parts else "no verdicts"
 
@@ -31,8 +28,10 @@ def _extract_response_text(response: dict) -> str:
     return str(response) if response else ""
 
 
-def generate_case_report(case_id: str, persona_results: dict[str, CasePersonaResult]) -> str:
+def generate_case_report(case_id: str, run_result: RunResult) -> str:
     """Generate markdown report for one case showing all personas side-by-side."""
+    persona_results = run_result.results.get(case_id, {})
+
     lines = [f"# Case: {case_id}", ""]
 
     for persona_id, result in persona_results.items():

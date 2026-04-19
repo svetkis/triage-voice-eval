@@ -36,8 +36,8 @@ async def main():
     print(generate_summary(result))
     print()
     # Show per-case detail
-    for case_id, persona_results in result.results.items():
-        print(generate_case_report(case_id, persona_results))
+    for case_id in result.results:
+        print(generate_case_report(case_id, result))
 
 
 if __name__ == "__main__":

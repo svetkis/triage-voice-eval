@@ -38,11 +38,19 @@ class EvalRunner:
 
             verdicts = [guard.evaluate(case, response) for guard in guards]
 
+            # Extract optional usage metadata from response.
+            # Pipeline functions can include _tokens and _cost keys
+            # to enable automatic usage tracking in results.
+            tokens = response.pop("_tokens", {})
+            cost = response.pop("_cost", 0.0)
+
             cpr = CasePersonaResult(
                 persona_id=persona.id,
                 response=response,
                 verdicts=verdicts,
                 latency_ms=latency_ms,
+                tokens=tokens,
+                cost=cost,
             )
             return case.id, persona.id, cpr
 
