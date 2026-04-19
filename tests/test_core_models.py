@@ -110,6 +110,7 @@ class TestCasePersonaResult:
         assert r.latency_ms == 0.0
         assert r.tokens == {}
         assert r.cost == 0.0
+        assert r.error is None
 
 
 class TestRunResult:

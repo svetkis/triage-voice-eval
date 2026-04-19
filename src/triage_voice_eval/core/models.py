@@ -31,6 +31,7 @@ class CasePersonaResult(BaseModel):
     latency_ms: float = 0.0
     tokens: dict[str, Any] = {}
     cost: float = 0.0
+    error: str | None = None
 
 
 class RunResult(BaseModel):

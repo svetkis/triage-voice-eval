@@ -101,6 +101,56 @@ async def test_runner_measures_latency():
 
 
 @pytest.mark.asyncio
+async def test_runner_isolates_pipeline_failure(two_cases_two_personas):
+    """One pipeline_fn raising doesn't lose the other results."""
+    scenario, personas = two_cases_two_personas
+
+    async def flaky_pipeline(case: TestCase, persona: Persona) -> dict:
+        if case.id == "c1" and persona.id == "p1":
+            raise RuntimeError("boom")
+        return {"text": "ok"}
+
+    runner = EvalRunner()
+    result = await runner.run(scenario, personas, [], flaky_pipeline)
+
+    failed = result.results["c1"]["p1"]
+    assert failed.error is not None
+    assert "RuntimeError" in failed.error
+    assert "boom" in failed.error
+    assert failed.verdicts == []
+    assert failed.response == {}
+
+    for case_id, persona_id in [("c1", "p2"), ("c2", "p1"), ("c2", "p2")]:
+        ok = result.results[case_id][persona_id]
+        assert ok.error is None
+        assert ok.response == {"text": "ok"}
+
+
+@pytest.mark.asyncio
+async def test_runner_does_not_mutate_pipeline_response():
+    """pipeline_fn's returned dict (including _tokens/_cost) is not mutated."""
+    scenario = Scenario(id="s1", test_cases=[TestCase(id="c1", input="hi")])
+    personas = [Persona(id="p1", name="P1")]
+
+    shared = {"text": "ok", "_tokens": {"in": 10, "out": 20}, "_cost": 0.01}
+
+    async def pipeline(case: TestCase, persona: Persona) -> dict:
+        return shared
+
+    runner = EvalRunner()
+    result = await runner.run(scenario, personas, [], pipeline)
+
+    assert "_tokens" in shared and shared["_tokens"] == {"in": 10, "out": 20}
+    assert "_cost" in shared and shared["_cost"] == 0.01
+
+    cpr = result.results["c1"]["p1"]
+    assert cpr.tokens == {"in": 10, "out": 20}
+    assert cpr.cost == 0.01
+    assert "_tokens" not in cpr.response
+    assert "_cost" not in cpr.response
+
+
+@pytest.mark.asyncio
 async def test_runner_respects_concurrency():
     """Concurrency limit is respected."""
     max_concurrent = 0
