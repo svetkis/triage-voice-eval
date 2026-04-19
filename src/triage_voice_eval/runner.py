@@ -85,5 +85,5 @@ class EvalRunner:
         return RunResult(
             scenario_id=scenario.id,
             results=results,
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(timezone.utc),
         )

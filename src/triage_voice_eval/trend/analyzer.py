@@ -44,13 +44,17 @@ class TrendAnalyzer:
         self.runs_dir = Path(runs_dir)
 
     def load_runs(self) -> list[tuple[str, RunResult]]:
-        """Load all runs from runs_dir, sorted by directory name.
+        """Load all runs from runs_dir, sorted by ``result.timestamp``.
+
+        Ties (including legacy runs with empty-string timestamps, which are
+        mapped to ``datetime.min`` by RunResult's validator) are broken by
+        directory name for deterministic ordering.
 
         Corrupted or unreadable result files are skipped with a warning
         logged to ``triage_voice_eval.trend.analyzer``.
         """
         runs: list[tuple[str, RunResult]] = []
-        for run_dir in sorted(self.runs_dir.iterdir()):
+        for run_dir in self.runs_dir.iterdir():
             result_path = run_dir / "result.json"
             if run_dir.is_dir() and result_path.exists():
                 try:
@@ -60,6 +64,7 @@ class TrendAnalyzer:
                     runs.append((run_dir.name, run_result))
                 except (OSError, json.JSONDecodeError, ValidationError) as exc:
                     logger.warning("Skipping %s: %s", run_dir.name, exc)
+        runs.sort(key=lambda pair: (pair[1].timestamp, pair[0]))
         return runs
 
     def detect_regressions(self) -> list[Regression]:

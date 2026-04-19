@@ -130,6 +130,28 @@ def test_trend_table_format(tmp_path):
     assert "←" in table
 
 
+def test_load_runs_sorts_by_timestamp_not_dirname(tmp_path):
+    """Sorting uses result.timestamp first, so arbitrarily-named dirs still order correctly."""
+    from datetime import datetime, timezone
+
+    older = _make_run("s1", {"c1": {"p1": [("crisis", Verdict.SAFE)]}})
+    older.timestamp = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    newer = _make_run("s1", {"c1": {"p1": [("crisis", Verdict.HELD)]}})
+    newer.timestamp = datetime(2024, 6, 1, tzinfo=timezone.utc)
+
+    # Dir names are intentionally out of chronological order.
+    _save_run(tmp_path, "zzz-first-by-name-but-newer", newer)
+    _save_run(tmp_path, "aaa-last-by-name-but-older", older)
+
+    analyzer = TrendAnalyzer(str(tmp_path))
+    runs = analyzer.load_runs()
+
+    assert [name for name, _ in runs] == [
+        "aaa-last-by-name-but-older",
+        "zzz-first-by-name-but-newer",
+    ]
+
+
 def test_load_runs_skips_corrupt_files_and_logs(tmp_path, caplog):
     """Corrupt result.json is skipped with a warning, not raised."""
     import logging

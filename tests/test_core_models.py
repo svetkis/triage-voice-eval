@@ -162,9 +162,21 @@ class TestCasePersonaResult:
 
 class TestRunResult:
     def test_defaults(self):
+        from datetime import datetime, timezone
+
         r = RunResult(scenario_id="s1")
         assert r.results == {}
-        assert r.timestamp == ""
+        assert isinstance(r.timestamp, datetime)
+        assert r.timestamp.tzinfo is not None
+        # default is "now" in UTC
+        assert abs((datetime.now(timezone.utc) - r.timestamp).total_seconds()) < 5
+
+    def test_legacy_empty_string_timestamp(self):
+        """Pre-0.2 result.json files with timestamp: "" must still parse."""
+        from datetime import datetime, timezone
+
+        r = RunResult.model_validate({"scenario_id": "s1", "timestamp": ""})
+        assert r.timestamp == datetime.min.replace(tzinfo=timezone.utc)
 
 
 class TestPersona:

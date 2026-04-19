@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from .verdicts import VerdictResult
+
+
+_EPOCH_UTC = datetime.min.replace(tzinfo=timezone.utc)
 
 
 class TestCase(BaseModel):
@@ -35,7 +39,21 @@ class CasePersonaResult(BaseModel):
 class RunResult(BaseModel):
     scenario_id: str
     results: dict[str, dict[str, CasePersonaResult]] = Field(default_factory=dict)
-    timestamp: str = ""
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+
+    @field_validator("timestamp", mode="before")
+    @classmethod
+    def _accept_empty_string(cls, v: Any) -> Any:
+        """Preserve backward compat with pre-0.2 result.json files.
+
+        Old runs stored ``timestamp: ""`` when omitted. Map empty string to
+        a UTC sentinel so such runs load and sort to the beginning.
+        """
+        if v == "":
+            return _EPOCH_UTC
+        return v
 
 
 class Scenario(BaseModel):
