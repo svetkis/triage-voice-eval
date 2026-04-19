@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `EvalRunner.run` no longer mutates the dict returned by `pipeline_fn` — optional
   `_tokens` / `_cost` keys are read from a shallow copy.
 
+### Removed (BREAKING)
+- `Persona.prompt_files` and `Persona.model_config_override` — unused stubs
+  never read by the runner. Wire such behavior into your own `pipeline_fn`
+  via `persona.id`.
+
 ## [0.1.0] - 2026-04-19
 
 ### Added

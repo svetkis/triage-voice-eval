@@ -138,5 +138,5 @@ class TestRunResult:
 class TestPersona:
     def test_creation(self):
         p = Persona(id="nastya", name="Nastya")
-        assert p.prompt_files == []
-        assert p.model_config_override == {}
+        assert p.id == "nastya"
+        assert p.name == "Nastya"
