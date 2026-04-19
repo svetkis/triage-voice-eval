@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `CasePersonaResult.error: str | None` field — populated when `pipeline_fn` raises,
+  so a single failure no longer loses the rest of the run. Reports render error rows
+  as `❌ ERROR` and count them as failures in the summary pass rate.
+
+### Changed
+- `EvalRunner.run` no longer mutates the dict returned by `pipeline_fn` — optional
+  `_tokens` / `_cost` keys are read from a shallow copy.
+
 ## [0.1.0] - 2026-04-19
 
 ### Added

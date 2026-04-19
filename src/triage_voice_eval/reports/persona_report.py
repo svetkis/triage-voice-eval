@@ -4,6 +4,8 @@ from triage_voice_eval.reports._utils import verdict_icon
 
 
 def _format_verdicts_compact(result: CasePersonaResult) -> str:
+    if result.error:
+        return f"❌ ERROR ({result.error})"
     parts = []
     for vr in result.verdicts:
         icon = verdict_icon(vr.verdict)

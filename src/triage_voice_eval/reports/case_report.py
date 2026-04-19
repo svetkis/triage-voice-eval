@@ -36,6 +36,13 @@ def generate_case_report(case_id: str, run_result: RunResult) -> str:
 
     for persona_id, result in persona_results.items():
         lines.append(f"## {persona_id}")
+
+        if result.error:
+            lines.append(f"**❌ Error:** {result.error}")
+            lines.append(f"**Latency:** {result.latency_ms:.0f}ms")
+            lines.append("")
+            continue
+
         lines.append(f"**Verdicts:** {_format_verdicts(result)}")
 
         # Show reason for non-passing verdicts

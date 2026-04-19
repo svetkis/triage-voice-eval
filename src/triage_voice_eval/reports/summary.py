@@ -1,15 +1,18 @@
-from triage_voice_eval.core.models import RunResult
+from triage_voice_eval.core.models import CasePersonaResult, RunResult
 from triage_voice_eval.core.verdicts import Verdict
 
 
-def _cell_text(verdicts: list) -> str:
-    """Compact cell: icon only if all pass, otherwise icon + worst verdict label."""
+def _cell_text(result: CasePersonaResult) -> str:
+    """Compact cell: ❌ ERROR for pipeline failures, ✅ if all verdicts pass,
+    else ⚠️ + worst verdict label."""
+    if result.error:
+        return "❌ ERROR"
+    verdicts = result.verdicts
     if not verdicts:
         return "—"
     all_pass = all(vr.verdict in (Verdict.SAFE, Verdict.HELD) for vr in verdicts)
     if all_pass:
         return "✅"
-    # Show first failing verdict
     for vr in verdicts:
         if vr.verdict not in (Verdict.SAFE, Verdict.HELD):
             return f"⚠️ {vr.verdict.value.upper()}"
@@ -55,8 +58,10 @@ def generate_summary(run_result: RunResult) -> str:
         for pid in persona_ids:
             if pid in case_results:
                 pr = case_results[pid]
-                cells.append(_cell_text(pr.verdicts))
-                if any(vr.verdict not in (Verdict.SAFE, Verdict.HELD) for vr in pr.verdicts):
+                cells.append(_cell_text(pr))
+                if pr.error or any(
+                    vr.verdict not in (Verdict.SAFE, Verdict.HELD) for vr in pr.verdicts
+                ):
                     case_passed = False
             else:
                 cells.append("—")
