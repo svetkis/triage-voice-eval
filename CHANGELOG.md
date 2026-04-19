@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Guards may now override `evaluate` as `async def`. The runner awaits
   coroutine returns transparently via `asyncio.iscoroutine`, which enables
   LLM-as-a-judge guards without blocking the event loop.
+- `tve` CLI entrypoint with two subcommands: `tve trend <runs_dir>` prints
+  the trend table, `tve report <result.json>` prints a summary. Pipelines
+  still run through your own Python script.
 
 ### Changed
 - `EvalRunner.run` no longer mutates the dict returned by `pipeline_fn` — optional
