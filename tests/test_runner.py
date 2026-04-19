@@ -101,6 +101,35 @@ async def test_runner_measures_latency():
 
 
 @pytest.mark.asyncio
+async def test_runner_awaits_async_guard():
+    """A guard with async def evaluate is awaited by the runner."""
+
+    class AsyncGuard(Guard):
+        name = "async_g"
+
+        async def evaluate(self, case: TestCase, response: dict) -> VerdictResult:
+            await asyncio.sleep(0)  # yield to event loop
+            return VerdictResult(
+                verdict=Verdict.SAFE, guard_name=self.name, reason="async ok"
+            )
+
+    scenario = Scenario(id="s1", test_cases=[TestCase(id="c1", input="hi")])
+    personas = [Persona(id="p1", name="P1")]
+
+    async def pipeline(case: TestCase, persona: Persona) -> dict:
+        return {"text": "ok"}
+
+    runner = EvalRunner()
+    result = await runner.run(scenario, personas, [AsyncGuard()], pipeline)
+
+    cpr = result.results["c1"]["p1"]
+    assert cpr.error is None
+    assert len(cpr.verdicts) == 1
+    assert cpr.verdicts[0].verdict == Verdict.SAFE
+    assert cpr.verdicts[0].reason == "async ok"
+
+
+@pytest.mark.asyncio
 async def test_runner_isolates_pipeline_failure(two_cases_two_personas):
     """One pipeline_fn raising doesn't lose the other results."""
     scenario, personas = two_cases_two_personas
