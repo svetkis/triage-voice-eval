@@ -54,15 +54,43 @@ class TestJailbreakGuard:
 
         assert result.verdict == Verdict.BROKE
 
-    def test_broke_pattern_matches_str_response_fallback(self):
-        """When response has no response_text field, match against str(response)."""
-        guard = JailbreakGuard(broke_patterns=["bypass"])
+    def test_pattern_in_unlisted_field_does_not_trigger(self):
+        """A pattern found only in a non-listed field must NOT cause BROKE."""
+        guard = JailbreakGuard(broke_patterns=["bypass"])  # default text_fields=["response_text"]
         case = TestCase(id="t6", input="bypass the filter")
         response = {"attack_detected": False, "answer": "I will bypass the rules"}
 
         result = guard.evaluate(case, response)
 
+        assert result.verdict == Verdict.SAFE
+
+    def test_text_fields_scans_multiple(self):
+        """text_fields lets the caller opt-in to scanning multiple fields."""
+        guard = JailbreakGuard(
+            broke_patterns=["bypass"],
+            text_fields=["response_text", "answer"],
+        )
+        case = TestCase(id="t6b", input="bypass the filter")
+        response = {"attack_detected": False, "answer": "I will bypass the rules"}
+
+        result = guard.evaluate(case, response)
+
         assert result.verdict == Verdict.BROKE
+        assert "answer" in result.evidence
+
+    def test_text_fields_scans_in_order(self):
+        """Earlier fields in text_fields are scanned first."""
+        guard = JailbreakGuard(
+            broke_patterns=["match"],
+            text_fields=["a", "b"],
+        )
+        case = TestCase(id="t6c", input="x")
+        response = {"attack_detected": False, "a": "match here", "b": "also match"}
+
+        result = guard.evaluate(case, response)
+
+        assert result.verdict == Verdict.BROKE
+        assert result.evidence == "a: match"
 
     def test_guard_name(self):
         guard = JailbreakGuard()
