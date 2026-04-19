@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from .verdicts import VerdictResult
 
@@ -53,16 +53,16 @@ class Scenario(BaseModel):
         try:
             with open(p, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
-        except (FileNotFoundError, yaml.YAMLError) as exc:
-            raise ValueError(f"Cannot load scenario from {path}: {exc}") from exc
 
-        if isinstance(data, list):
+            if isinstance(data, list):
+                return cls(
+                    id=p.stem,
+                    test_cases=[TestCase(**item) for item in data],
+                )
+
             return cls(
-                id=p.stem,
-                test_cases=[TestCase(**item) for item in data],
+                id=data["id"],
+                test_cases=[TestCase(**tc) for tc in data["test_cases"]],
             )
-
-        return cls(
-            id=data["id"],
-            test_cases=[TestCase(**tc) for tc in data["test_cases"]],
-        )
+        except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError, ValidationError) as exc:
+            raise ValueError(f"Cannot load scenario from {path}: {exc}") from exc

@@ -97,6 +97,27 @@ class TestScenarioFromYaml:
         assert scenario.test_cases[0].id == "c1"
         assert scenario.test_cases[1].expected == {"tone": "polite"}
 
+    def test_missing_id_raises_value_error(self, tmp_path: Path):
+        data = {"test_cases": [{"id": "c1", "input": "x"}]}
+        f = tmp_path / "no_id.yaml"
+        f.write_text(yaml.dump(data), encoding="utf-8")
+        with pytest.raises(ValueError, match="Cannot load scenario"):
+            Scenario.from_yaml(str(f))
+
+    def test_missing_test_cases_raises_value_error(self, tmp_path: Path):
+        data = {"id": "x"}
+        f = tmp_path / "no_cases.yaml"
+        f.write_text(yaml.dump(data), encoding="utf-8")
+        with pytest.raises(ValueError, match="Cannot load scenario"):
+            Scenario.from_yaml(str(f))
+
+    def test_test_case_missing_input_raises_value_error(self, tmp_path: Path):
+        data = {"id": "x", "test_cases": [{"id": "c1"}]}
+        f = tmp_path / "no_input.yaml"
+        f.write_text(yaml.dump(data), encoding="utf-8")
+        with pytest.raises(ValueError, match="Cannot load scenario"):
+            Scenario.from_yaml(str(f))
+
     def test_cyrillic_utf8(self, tmp_path: Path):
         """UTF-8 YAML with cyrillic chars loads regardless of platform locale."""
         data = {
