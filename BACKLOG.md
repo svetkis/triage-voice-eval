@@ -94,7 +94,8 @@ make example-shopco    # smoke-check примера после изменени�
   - [ ] Grep по репо — ни одного usage не осталось (examples/tests)
   - [ ] CHANGELOG: "Removed (BREAKING): `Persona.prompt_files`, `Persona.model_config_override` — unused stubs"
 
-### [ ] #6 Mutable defaults → `Field(default_factory=...)`
+### [x] #6 Mutable defaults → `Field(default_factory=...)`
+Готово: все поля в моделях на `Field(default_factory=...)`, тест изоляции инстансов.
 - **Файл:** [src/triage_voice_eval/core/models.py](src/triage_voice_eval/core/models.py)
 - **Строки:** 15-17 (TestCase), 23 (Persona после #5), 29-32 (CasePersonaResult), 38 (RunResult)
 - **DoD:**

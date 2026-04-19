@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .verdicts import VerdictResult
 
@@ -12,9 +12,9 @@ from .verdicts import VerdictResult
 class TestCase(BaseModel):
     id: str
     input: str
-    expected: dict[str, Any] = {}
-    metadata: dict[str, Any] = {}
-    history: list[dict[str, Any]] = []
+    expected: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    history: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class Persona(BaseModel):
@@ -24,17 +24,17 @@ class Persona(BaseModel):
 
 class CasePersonaResult(BaseModel):
     persona_id: str
-    response: dict[str, Any] = {}
-    verdicts: list[VerdictResult] = []
+    response: dict[str, Any] = Field(default_factory=dict)
+    verdicts: list[VerdictResult] = Field(default_factory=list)
     latency_ms: float = 0.0
-    tokens: dict[str, Any] = {}
+    tokens: dict[str, Any] = Field(default_factory=dict)
     cost: float = 0.0
     error: str | None = None
 
 
 class RunResult(BaseModel):
     scenario_id: str
-    results: dict[str, dict[str, CasePersonaResult]] = {}
+    results: dict[str, dict[str, CasePersonaResult]] = Field(default_factory=dict)
     timestamp: str = ""
 
 
