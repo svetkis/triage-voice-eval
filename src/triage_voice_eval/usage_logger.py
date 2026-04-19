@@ -108,7 +108,12 @@ class UsageLogger:
 
     @staticmethod
     def _percentile(sorted_values: list[float], p: float) -> float:
-        """Pick value at percentile position. index = ceil(n * p) - 1."""
+        """Nearest-rank percentile: index = ceil(n * p) - 1.
+
+        Differs from ``numpy.percentile`` (linear interpolation by default)
+        and ``statistics.quantiles`` — use those if interpolated percentiles
+        are required. Chosen here for simplicity and to avoid a numpy dep.
+        """
         n = len(sorted_values)
         if n == 0:
             return 0.0

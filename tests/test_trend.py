@@ -130,6 +130,26 @@ def test_trend_table_format(tmp_path):
     assert "←" in table
 
 
+def test_load_runs_skips_corrupt_files_and_logs(tmp_path, caplog):
+    """Corrupt result.json is skipped with a warning, not raised."""
+    import logging
+
+    good = _make_run("s1", {"case-1": {"persona-1": [("crisis", Verdict.SAFE)]}})
+    _save_run(tmp_path, "run-001", good)
+
+    bad_dir = tmp_path / "run-002"
+    bad_dir.mkdir()
+    (bad_dir / "result.json").write_text("{not valid json")
+
+    analyzer = TrendAnalyzer(str(tmp_path))
+    with caplog.at_level(logging.WARNING, logger="triage_voice_eval.trend.analyzer"):
+        runs = analyzer.load_runs()
+
+    assert len(runs) == 1
+    assert runs[0][0] == "run-001"
+    assert any("run-002" in rec.message for rec in caplog.records)
+
+
 def test_load_runs_sorted(tmp_path):
     """Runs are loaded sorted by directory name (timestamp)."""
     run_b = _make_run("s1", {"case-1": {"persona-1": [("crisis", Verdict.SAFE)]}})
