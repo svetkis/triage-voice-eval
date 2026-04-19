@@ -20,8 +20,6 @@ class TestCase(BaseModel):
 class Persona(BaseModel):
     id: str
     name: str
-    prompt_files: list[str] = []
-    model_config_override: dict[str, Any] = {}
 
 
 class CasePersonaResult(BaseModel):
