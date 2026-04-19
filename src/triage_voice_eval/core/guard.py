@@ -31,5 +31,9 @@ class Guard(ABC):
 
         Returns:
             VerdictResult with one of: SAFE, HELD, LEAK, MISS, BROKE.
+
+        May be overridden as ``async def`` in subclasses that need I/O
+        (e.g. LLM-as-a-judge). The runner awaits coroutine returns
+        transparently.
         """
         ...

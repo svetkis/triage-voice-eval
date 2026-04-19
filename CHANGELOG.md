@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CasePersonaResult.error: str | None` field — populated when `pipeline_fn` raises,
   so a single failure no longer loses the rest of the run. Reports render error rows
   as `❌ ERROR` and count them as failures in the summary pass rate.
+- Guards may now override `evaluate` as `async def`. The runner awaits
+  coroutine returns transparently via `asyncio.iscoroutine`, which enables
+  LLM-as-a-judge guards without blocking the event loop.
 
 ### Changed
 - `EvalRunner.run` no longer mutates the dict returned by `pipeline_fn` — optional

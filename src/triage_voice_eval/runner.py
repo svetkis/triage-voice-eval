@@ -60,7 +60,12 @@ class EvalRunner:
             tokens = response.pop("_tokens", {})
             cost = response.pop("_cost", 0.0)
 
-            verdicts = [guard.evaluate(case, response) for guard in guards]
+            verdicts = []
+            for guard in guards:
+                out = guard.evaluate(case, response)
+                if asyncio.iscoroutine(out):
+                    out = await out
+                verdicts.append(out)
 
             cpr = CasePersonaResult(
                 persona_id=persona.id,
