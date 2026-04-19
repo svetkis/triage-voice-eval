@@ -23,6 +23,17 @@ class TestTestCase:
         assert tc.metadata == {}
         assert tc.history == []
 
+    def test_defaults_are_isolated(self):
+        """Mutating one instance's dict/list must not leak to another."""
+        a = TestCase(id="a", input="x")
+        b = TestCase(id="b", input="y")
+        a.expected["k"] = 1
+        a.metadata["m"] = 2
+        a.history.append({"role": "user"})
+        assert b.expected == {}
+        assert b.metadata == {}
+        assert b.history == []
+
     def test_full_data(self):
         tc = TestCase(
             id="t2",
