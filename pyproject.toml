@@ -40,6 +40,9 @@ dependencies = [
     "pyyaml>=6.0",
 ]
 
+[project.scripts]
+tve = "triage_voice_eval.cli:main"
+
 [project.urls]
 # TODO: replace <owner>/<repo> if repo is renamed after publishing
 Homepage   = "https://github.com/svetkis/triage-voice-eval"

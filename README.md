@@ -377,6 +377,21 @@ The summary includes total tokens, total cost, and latency percentiles (p50, p95
 
 ---
 
+## CLI
+
+After `pip install -e .`, a `tve` command is on PATH:
+
+```bash
+tve trend ./eval-runs               # trend table across all runs in a directory
+tve report ./eval-runs/run-001/result.json   # summary for one run
+```
+
+The CLI only reads existing `result.json` files — it does not execute
+pipelines. `pipeline_fn` is a Python callable, so wire your eval through
+your own script (see `examples/`).
+
+---
+
 ## Robust JSON Parser
 
 Use it in your `pipeline_fn` to handle malformed LLM responses:

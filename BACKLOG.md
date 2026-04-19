@@ -196,7 +196,8 @@ make example-shopco    # smoke-check примера после изменени�
 - **Файл:** [src/triage_voice_eval/usage_logger.py:109-117](src/triage_voice_eval/usage_logger.py#L109-L117)
 - **DoD:** docstring: "Nearest-rank method (index = ceil(n*p) - 1). Differs from numpy.percentile (which uses linear interpolation by default) and statistics.quantiles."
 
-### [ ] #16 CLI entrypoint
+### [x] #16 CLI entrypoint
+Готово: `src/triage_voice_eval/cli.py` на `argparse`, `tve trend` и `tve report`. `[project.scripts]` в pyproject.toml. 4 теста, секция в README.
 - **Файл:** [pyproject.toml](pyproject.toml), новый `src/triage_voice_eval/cli.py`
 - **Решение (принято):** минимальный `argparse`-CLI, без сторонних зависимостей (click/typer). Команды первой итерации:
   - `tve trend <runs_dir>` — печатает `generate_trend_table`
