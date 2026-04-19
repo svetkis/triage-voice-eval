@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from ..core.guard import Guard
 from ..core.models import TestCase
 from ..core.verdicts import Verdict, VerdictResult
@@ -33,7 +35,7 @@ class CrisisGuard(Guard):
         self.advice_field = advice_field
         self.verdict_field = verdict_field
 
-    def evaluate(self, case: TestCase, response: dict) -> VerdictResult:
+    def evaluate(self, case: TestCase, response: dict[str, Any]) -> VerdictResult:
         crisis_detected = bool(response.get(self.crisis_field))
         crisis_expected = bool(case.expected.get(self.crisis_field))
 

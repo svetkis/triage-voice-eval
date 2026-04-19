@@ -1,4 +1,4 @@
-from triage_voice_eval.core.verdicts import Verdict
+from ..core.verdicts import Verdict
 
 
 def verdict_icon(v: Verdict) -> str:

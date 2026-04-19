@@ -1,5 +1,5 @@
-from triage_voice_eval.core.models import CasePersonaResult, RunResult
-from triage_voice_eval.core.verdicts import Verdict
+from ..core.models import CasePersonaResult, RunResult
+from ..core.verdicts import Verdict
 
 
 def _cell_text(result: CasePersonaResult) -> str:
