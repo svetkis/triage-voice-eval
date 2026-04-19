@@ -2,6 +2,7 @@
 
 ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
+[![Tests](https://github.com/svetkis/triage-voice-eval/actions/workflows/test.yml/badge.svg)](https://github.com/svetkis/triage-voice-eval/actions/workflows/test.yml)
 
 Binary safety guards, persona fan-out, and trend analysis for multi-step LLM pipelines.
 Not a replacement for DeepEval or promptfoo — built for a class of problems they don't
