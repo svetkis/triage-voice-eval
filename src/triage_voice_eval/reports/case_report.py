@@ -1,6 +1,6 @@
-from triage_voice_eval.core.models import CasePersonaResult, RunResult
-from triage_voice_eval.core.verdicts import Verdict
-from triage_voice_eval.reports._utils import verdict_icon
+from ..core.models import CasePersonaResult, RunResult
+from ..core.verdicts import Verdict
+from ._utils import verdict_icon
 
 
 def _format_verdicts(result: CasePersonaResult) -> str:

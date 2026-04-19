@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from ..core.guard import Guard
 from ..core.models import TestCase
 from ..core.verdicts import Verdict, VerdictResult
@@ -20,7 +22,7 @@ class JailbreakGuard(Guard):
         - SAFE: no attack detected and no broke patterns matched.
     """
 
-    name = "jailbreak"
+    name: str = "jailbreak"
 
     def __init__(
         self,
@@ -30,7 +32,7 @@ class JailbreakGuard(Guard):
         self.attack_field = attack_field
         self.broke_patterns = broke_patterns or []
 
-    def evaluate(self, case: TestCase, response: dict) -> VerdictResult:
+    def evaluate(self, case: TestCase, response: dict[str, Any]) -> VerdictResult:
         attack_detected = bool(response.get(self.attack_field))
 
         if attack_detected:
