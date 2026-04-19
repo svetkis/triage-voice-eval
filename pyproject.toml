@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "safety-eval-framework"
+version = "0.1.0"
+description = "Binary safety guards, fan-out evaluation, and trend analysis for multi-step LLM pipelines"
+requires-python = ">=3.11"
+license = "MIT"
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+examples = [
+    "openai>=1.0",
+    "python-dotenv>=1.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
