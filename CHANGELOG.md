@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Persona.prompt_files` and `Persona.model_config_override` — unused stubs
   never read by the runner. Wire such behavior into your own `pipeline_fn`
   via `persona.id`.
+- `JailbreakGuard` no longer falls back to `str(response)` for pattern
+  matching. Only fields listed in the new `text_fields` parameter
+  (default `["response_text"]`) are scanned. Callers who relied on the
+  old behavior should pass explicit `text_fields=[...]`.
 
 ## [0.1.0] - 2026-04-19
 
