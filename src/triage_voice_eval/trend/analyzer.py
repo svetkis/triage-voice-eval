@@ -51,7 +51,9 @@ class TrendAnalyzer:
             result_path = run_dir / "result.json"
             if run_dir.is_dir() and result_path.exists():
                 try:
-                    run_result = RunResult.model_validate_json(result_path.read_text())
+                    run_result = RunResult.model_validate_json(
+                        result_path.read_text(encoding="utf-8")
+                    )
                     runs.append((run_dir.name, run_result))
                 except Exception as exc:
                     warnings.warn(f"Skipping {run_dir.name}: {exc}")

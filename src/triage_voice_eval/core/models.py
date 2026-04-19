@@ -53,7 +53,7 @@ class Scenario(BaseModel):
         """
         p = Path(path)
         try:
-            with open(p) as f:
+            with open(p, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
         except (FileNotFoundError, yaml.YAMLError) as exc:
             raise ValueError(f"Cannot load scenario from {path}: {exc}") from exc

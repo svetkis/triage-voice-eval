@@ -86,6 +86,21 @@ class TestScenarioFromYaml:
         assert scenario.test_cases[0].id == "c1"
         assert scenario.test_cases[1].expected == {"tone": "polite"}
 
+    def test_cyrillic_utf8(self, tmp_path: Path):
+        """UTF-8 YAML with cyrillic chars loads regardless of platform locale."""
+        data = {
+            "id": "кризис",
+            "test_cases": [
+                {"id": "c1", "input": "мне плохо", "expected": {"is_crisis": True}},
+            ],
+        }
+        f = tmp_path / "ru.yaml"
+        f.write_bytes(yaml.dump(data, allow_unicode=True).encode("utf-8"))
+
+        scenario = Scenario.from_yaml(str(f))
+        assert scenario.id == "кризис"
+        assert scenario.test_cases[0].input == "мне плохо"
+
     def test_dict_format(self, tmp_path: Path):
         data = {
             "id": "crisis",
