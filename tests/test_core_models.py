@@ -2,7 +2,7 @@ import pytest
 import yaml
 from pathlib import Path
 
-from safety_eval.core import (
+from triage_voice_eval.core import (
     Verdict,
     VerdictResult,
     Guard,
