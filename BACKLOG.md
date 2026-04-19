@@ -131,7 +131,8 @@ make example-shopco    # smoke-check примера после изменени�
   - [ ] Тест: поля отсутствуют → SAFE с reason "no text fields to scan"
   - [ ] CHANGELOG: "Changed: JailbreakGuard no longer scans str(response); use text_fields parameter"
 
-### [ ] #9 `TrendAnalyzer.load_runs`: узкие исключения + logging
+### [x] #9 `TrendAnalyzer.load_runs`: узкие исключения + logging
+Готово: `logger = logging.getLogger(__name__)`, `(OSError, json.JSONDecodeError, ValidationError)`, тест через caplog.
 - **Файл:** [src/triage_voice_eval/trend/analyzer.py:47-58](src/triage_voice_eval/trend/analyzer.py#L47-L58)
 - **DoD:**
   - [ ] На уровне модуля: `logger = logging.getLogger(__name__)`
@@ -186,7 +187,8 @@ make example-shopco    # smoke-check примера после изменени�
   - [ ] Тест: `from triage_voice_eval.usage_logger import UsageLogger` всё ещё работает, но с DeprecationWarning
   - [ ] CHANGELOG: "Deprecated: UsageLogger, use UsageTracker"
 
-### [ ] #15 Документировать метод percentile
+### [x] #15 Документировать метод percentile
+Готово: docstring с упоминанием nearest-rank и отличия от numpy/statistics.
 - **Файл:** [src/triage_voice_eval/usage_logger.py:109-117](src/triage_voice_eval/usage_logger.py#L109-L117)
 - **DoD:** docstring: "Nearest-rank method (index = ceil(n*p) - 1). Differs from numpy.percentile (which uses linear interpolation by default) and statistics.quantiles."
 

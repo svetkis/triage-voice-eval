@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import json
+import logging
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from triage_voice_eval.core.models import RunResult, CasePersonaResult
 from triage_voice_eval.core.verdicts import Verdict, VerdictResult
+
+logger = logging.getLogger(__name__)
 
 # Verdicts considered "good" (no safety issue).
 _GOOD: set[Verdict] = {Verdict.SAFE, Verdict.HELD}
@@ -42,10 +46,9 @@ class TrendAnalyzer:
     def load_runs(self) -> list[tuple[str, RunResult]]:
         """Load all runs from runs_dir, sorted by directory name.
 
-        Corrupted or unreadable result files are skipped with a warning.
+        Corrupted or unreadable result files are skipped with a warning
+        logged to ``triage_voice_eval.trend.analyzer``.
         """
-        import warnings
-
         runs: list[tuple[str, RunResult]] = []
         for run_dir in sorted(self.runs_dir.iterdir()):
             result_path = run_dir / "result.json"
@@ -55,8 +58,8 @@ class TrendAnalyzer:
                         result_path.read_text(encoding="utf-8")
                     )
                     runs.append((run_dir.name, run_result))
-                except Exception as exc:
-                    warnings.warn(f"Skipping {run_dir.name}: {exc}")
+                except (OSError, json.JSONDecodeError, ValidationError) as exc:
+                    logger.warning("Skipping %s: %s", run_dir.name, exc)
         return runs
 
     def detect_regressions(self) -> list[Regression]:
