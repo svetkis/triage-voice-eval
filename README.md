@@ -138,7 +138,7 @@ triage-voice-eval/
 ├── src/triage_voice_eval/
 │   ├── __init__.py
 │   ├── runner.py              # EvalRunner — orchestrates case x persona fan-out
-│   ├── usage_logger.py        # Token/cost/latency tracking with percentiles
+│   ├── usage_tracker.py       # Token/cost/latency tracking with percentiles
 │   ├── core/
 │   │   ├── verdicts.py        # Verdict enum, VerdictResult model
 │   │   ├── guard.py           # Guard ABC
@@ -358,19 +358,19 @@ The `←` marker indicates a regression in that run.
 Track tokens, cost, and latency across your eval run:
 
 ```python
-from triage_voice_eval.usage_logger import UsageLogger
+from triage_voice_eval.usage_tracker import UsageTracker
 
-logger = UsageLogger(
+tracker = UsageTracker(
     cost_per_1m_input=3.0,    # $/1M input tokens
     cost_per_1m_output=15.0,  # $/1M output tokens
 )
 
 # Log each LLM call inside your pipeline_fn
-logger.log(input_tokens=1200, output_tokens=350, latency_ms=890)
+tracker.log(input_tokens=1200, output_tokens=350, latency_ms=890)
 
 # After the run
-print(logger.to_markdown())
-print(logger.to_dict())  # for JSON serialization
+print(tracker.to_markdown())
+print(tracker.to_dict())  # for JSON serialization
 ```
 
 The summary includes total tokens, total cost, and latency percentiles (p50, p95, p99).

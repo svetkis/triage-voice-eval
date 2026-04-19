@@ -24,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `TrendAnalyzer.load_runs` now sorts by `result.timestamp` (with directory
   name as a deterministic tie-breaker), not by directory name alone.
 
+### Deprecated
+- `triage_voice_eval.usage_logger.UsageLogger` — use
+  `triage_voice_eval.usage_tracker.UsageTracker` instead. The old name is
+  a shim that emits `DeprecationWarning` and resolves to `UsageTracker`.
+  The shim will be removed in v0.2. (Rename reflects the class's actual
+  job: aggregation, not logging.)
+
 ### Removed (BREAKING)
 - `Persona.prompt_files` and `Persona.model_config_override` — unused stubs
   never read by the runner. Wire such behavior into your own `pipeline_fn`
