@@ -89,8 +89,8 @@ the result is real or the fallback value.
 ## Quickstart
 
 ```bash
-# Install with dev and example dependencies
-pip install -e ".[dev,examples]"
+# Install with dev dependencies
+pip install -e ".[dev]"
 
 # Run the ShopCo example (CrisisGuard + JailbreakGuard, single persona)
 python -m examples.shopco_eval.run_eval
