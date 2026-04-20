@@ -8,6 +8,15 @@ Binary safety guards, persona fan-out, and trend analysis for multi-step LLM pip
 Not a replacement for DeepEval or promptfoo — built for a class of problems they don't
 cover: safety-critical pipelines where the answer isn't a score but a verdict.
 
+## Why this exists
+
+Built for a production LLM support bot where "the answer is 73% good" was not a
+useful metric. We needed to know, every night, whether the safety gate held: did
+the model leak advice during a crisis, did a jailpoke break through, did we miss
+a distress signal that the previous release caught. DeepEval and promptfoo
+measure *quality*. This measures *verdict*: SAFE, HELD, LEAK, MISS, or BROKE —
+with no numbers in between.
+
 ---
 
 ## When to use this (and when not to)
@@ -102,6 +111,10 @@ python -m examples.multi_persona.run_eval
 pytest -v
 ```
 
+Each example run prints a markdown summary with verdicts per case (`✅ SAFE`,
+`⚠️ LEAK`, `❌ BROKE`, etc.) and writes a `RunResult` JSON to `eval-runs/` for
+trend analysis across releases.
+
 ---
 
 ## Architecture
@@ -133,6 +146,9 @@ result = await runner.run(
 
 ### Project Structure
 
+<details>
+<summary>Click to expand full tree</summary>
+
 ```
 triage-voice-eval/
 ├── src/triage_voice_eval/
@@ -162,6 +178,8 @@ triage-voice-eval/
 ├── Makefile
 └── LICENSE
 ```
+
+</details>
 
 ---
 
