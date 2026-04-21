@@ -7,3 +7,4 @@ dist/
 eval-runs/
 .pytest_cache/
 .mypy_cache/
+.serena/
