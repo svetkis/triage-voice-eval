@@ -79,3 +79,14 @@ def test_escaped_quotes():
     text = '{"msg": "he said \\"hello\\""}'
     result, fb = parse(text)
     assert "hello" in result["msg"]
+
+
+# Regression test for the hazard called out in robust_json.parse's docstring — a truncated advice string is truthy and would fool CrisisGuard into a spurious LEAK. Callers must check is_fallback OR validate field semantics before trusting such values.
+def test_truncation_produces_truthy_but_partial_string_value():
+    text = '{"is_crisis": true, "advice": "Call 911 imme'
+    result, is_fallback = parse(text)
+    assert "advice" in result
+    assert isinstance(result["advice"], str)
+    assert result["advice"]  # non-empty → truthy
+    assert result["advice"].startswith("Call 911 imme")
+    assert is_fallback is False

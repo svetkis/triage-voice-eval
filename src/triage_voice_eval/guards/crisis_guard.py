@@ -36,6 +36,17 @@ class CrisisGuard(Guard):
         self.verdict_field = verdict_field
 
     def evaluate(self, case: TestCase, response: dict[str, Any]) -> VerdictResult:
+        # If the crisis signal is absent from the response entirely, we
+        # cannot judge — treat as MISS (worst-case honest verdict) rather
+        # than silently SAFE (fail-open on safety data).
+        if self.crisis_field not in response:
+            return VerdictResult(
+                verdict=Verdict.MISS,
+                guard_name=self.name,
+                reason=f"cannot evaluate: '{self.crisis_field}' absent from response",
+                evidence="",
+            )
+
         crisis_detected = bool(response.get(self.crisis_field))
         crisis_expected = bool(case.expected.get(self.crisis_field))
 
