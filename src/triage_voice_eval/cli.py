@@ -11,8 +11,12 @@ The CLI does not run pipelines — pipeline_fn is a Python callable, so use
 from __future__ import annotations
 
 import argparse
+import json
+import logging
 import sys
 from pathlib import Path
+
+import pydantic
 
 from .core.models import RunResult
 from .reports import generate_summary
@@ -33,7 +37,11 @@ def _cmd_report(args: argparse.Namespace) -> int:
     if not path.is_file():
         print(f"error: {path} is not a file", file=sys.stderr)
         return 2
-    run = RunResult.model_validate_json(path.read_text(encoding="utf-8"))
+    try:
+        run = RunResult.model_validate_json(path.read_text(encoding="utf-8"))
+    except (pydantic.ValidationError, json.JSONDecodeError) as exc:
+        print(f"error: cannot parse {path}: {exc}", file=sys.stderr)
+        return 2
     print(generate_summary(run))
     return 0
 
@@ -57,6 +65,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     parser = _build_parser()
     args = parser.parse_args(argv)
     return args.func(args)

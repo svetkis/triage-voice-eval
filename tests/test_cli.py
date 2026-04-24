@@ -72,3 +72,14 @@ def test_cli_trend_missing_dir_exits_2(tmp_path, capsys):
     assert exit_code == 2
     err = capsys.readouterr().err
     assert "is not a directory" in err
+
+
+def test_report_exits_2_on_malformed_json(tmp_path, capsys):
+    bad = tmp_path / "bad.json"
+    bad.write_text("{not json", encoding="utf-8")
+
+    exit_code = main(["report", str(bad)])
+
+    assert exit_code == 2
+    err = capsys.readouterr().err
+    assert "error:" in err

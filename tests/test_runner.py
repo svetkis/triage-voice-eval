@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 
 import pytest
 
@@ -157,11 +158,16 @@ async def test_runner_isolates_pipeline_failure(two_cases_two_personas):
 
 @pytest.mark.asyncio
 async def test_runner_does_not_mutate_pipeline_response():
-    """pipeline_fn's returned dict (including _tokens/_cost) is not mutated."""
+    """pipeline_fn's returned dict (including _tokens/_cost/_latency_ms) is not mutated."""
     scenario = Scenario(id="s1", test_cases=[TestCase(id="c1", input="hi")])
     personas = [Persona(id="p1", name="P1")]
 
-    shared = {"text": "ok", "_tokens": {"in": 10, "out": 20}, "_cost": 0.01}
+    shared = {
+        "text": "ok",
+        "_tokens": {"in": 10, "out": 20},
+        "_cost": 0.01,
+        "_latency_ms": 42.0,
+    }
 
     async def pipeline(case: TestCase, persona: Persona) -> dict:
         return shared
@@ -171,12 +177,58 @@ async def test_runner_does_not_mutate_pipeline_response():
 
     assert "_tokens" in shared and shared["_tokens"] == {"in": 10, "out": 20}
     assert "_cost" in shared and shared["_cost"] == 0.01
+    assert "_latency_ms" in shared and shared["_latency_ms"] == 42.0
 
     cpr = result.results["c1"]["p1"]
     assert cpr.tokens == {"in": 10, "out": 20}
     assert cpr.cost == 0.01
     assert "_tokens" not in cpr.response
     assert "_cost" not in cpr.response
+    assert "_latency_ms" not in cpr.response
+
+
+@pytest.mark.asyncio
+async def test_runner_strips_latency_ms_from_response():
+    """_latency_ms leaked from pipeline_fn is stripped from stored response."""
+    scenario = Scenario(id="s1", test_cases=[TestCase(id="c1", input="hi")])
+    personas = [Persona(id="p1", name="P1")]
+
+    async def pipeline(case: TestCase, persona: Persona) -> dict:
+        return {"response_text": "ok", "_latency_ms": 123.45}
+
+    runner = EvalRunner()
+    result = await runner.run(scenario, personas, [], pipeline)
+
+    cpr = result.results["c1"]["p1"]
+    assert "_latency_ms" not in cpr.response
+    assert cpr.response == {"response_text": "ok"}
+
+
+@pytest.mark.asyncio
+async def test_runner_logs_pipeline_exception(caplog):
+    """A raising pipeline_fn produces an ERROR-level log record identifying the pair."""
+    caplog.set_level(logging.ERROR, logger="triage_voice_eval.runner")
+
+    scenario = Scenario(id="s1", test_cases=[TestCase(id="c1", input="hi")])
+    personas = [Persona(id="p1", name="P1")]
+
+    async def boom_pipeline(case: TestCase, persona: Persona) -> dict:
+        raise ValueError("boom")
+
+    runner = EvalRunner()
+    result = await runner.run(scenario, personas, [], boom_pipeline)
+
+    # Result still contains the error
+    assert "ValueError" in result.results["c1"]["p1"].error
+
+    error_records = [
+        r for r in caplog.records
+        if r.levelno == logging.ERROR and r.name == "triage_voice_eval.runner"
+    ]
+    assert error_records, "expected an ERROR record on pipeline_fn failure"
+    msg = error_records[0].getMessage()
+    assert "c1" in msg
+    assert "p1" in msg
 
 
 @pytest.mark.asyncio
