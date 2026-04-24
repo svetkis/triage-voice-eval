@@ -4,9 +4,8 @@
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 [![Tests](https://github.com/svetkis/triage-voice-eval/actions/workflows/test.yml/badge.svg)](https://github.com/svetkis/triage-voice-eval/actions/workflows/test.yml)
 
-Binary safety guards, persona fan-out, and trend analysis for multi-step LLM pipelines.
-Not a replacement for DeepEval or promptfoo — built for a class of problems they don't
-cover: safety-critical pipelines where the answer isn't a score but a verdict.
+Eval companion for the [Triage-and-Voice pattern](https://substack.com/home/post/p-193325003).
+Tests whether your safety gate holds — not whether the output is good.
 
 ## Why this exists
 
