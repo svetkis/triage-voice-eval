@@ -12,7 +12,6 @@ report MISS rather than reading stale data.
 from __future__ import annotations
 
 import sys
-import time
 from pathlib import Path
 from typing import Any
 
@@ -42,7 +41,7 @@ def _get_pipeline():
             f"`pip install -e .` inside it."
         )
     if str(_TRIAGE_AND_VOICE_ROOT) not in sys.path:
-        sys.path.insert(0, str(_TRIAGE_AND_VOICE_ROOT))
+        sys.path.append(str(_TRIAGE_AND_VOICE_ROOT))
 
     from examples.skycarrier.main import build_pipeline  # noqa: E402
 
@@ -61,14 +60,11 @@ async def run_pipeline(case: TestCase, persona: Persona) -> dict[str, Any]:
         for msg in case.history
     ]
 
-    t0 = time.perf_counter()
     resp = await pipeline.process_message(case.input, history)
-    latency_ms = (time.perf_counter() - t0) * 1000
 
     result: dict[str, Any] = {
         "response_text": resp.text,
         "human_handoff": resp.human_handoff,
-        "_latency_ms": latency_ms,
     }
 
     if resp.classification is not None:

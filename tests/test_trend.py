@@ -172,6 +172,23 @@ def test_load_runs_skips_corrupt_files_and_logs(tmp_path, caplog):
     assert any("run-002" in rec.message for rec in caplog.records)
 
 
+def test_generate_trend_table_reports_skipped_runs(tmp_path):
+    """Corrupt runs are surfaced in the generated table output, not just logged."""
+    run1 = _make_run("s1", {"case-1": {"persona-1": [("crisis", Verdict.SAFE)]}})
+    run2 = _make_run("s1", {"case-1": {"persona-1": [("crisis", Verdict.HELD)]}})
+    _save_run(tmp_path, "run-001", run1)
+    _save_run(tmp_path, "run-002", run2)
+
+    bad_dir = tmp_path / "run-003"
+    bad_dir.mkdir()
+    (bad_dir / "result.json").write_text("{not valid json")
+
+    analyzer = TrendAnalyzer(str(tmp_path))
+    table = analyzer.generate_trend_table()
+
+    assert "1 run(s) skipped" in table
+
+
 def test_load_runs_sorted(tmp_path):
     """Runs are loaded sorted by directory name (timestamp)."""
     run_b = _make_run("s1", {"case-1": {"persona-1": [("crisis", Verdict.SAFE)]}})

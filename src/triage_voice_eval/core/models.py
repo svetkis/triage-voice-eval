@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -73,14 +74,19 @@ class Scenario(BaseModel):
                 data = yaml.safe_load(f)
 
             if isinstance(data, list):
-                return cls(
-                    id=p.stem,
-                    test_cases=[TestCase(**item) for item in data],
+                test_cases = [TestCase(**item) for item in data]
+                scenario_id = p.stem
+            else:
+                test_cases = [TestCase(**tc) for tc in data["test_cases"]]
+                scenario_id = data["id"]
+
+            id_counts = Counter(tc.id for tc in test_cases)
+            duplicates = sorted(cid for cid, n in id_counts.items() if n > 1)
+            if duplicates:
+                raise ValueError(
+                    f"duplicate test_case id(s): {duplicates}"
                 )
 
-            return cls(
-                id=data["id"],
-                test_cases=[TestCase(**tc) for tc in data["test_cases"]],
-            )
-        except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError, ValidationError) as exc:
+            return cls(id=scenario_id, test_cases=test_cases)
+        except (FileNotFoundError, yaml.YAMLError, KeyError, TypeError, ValidationError, ValueError) as exc:
             raise ValueError(f"Cannot load scenario from {path}: {exc}") from exc
