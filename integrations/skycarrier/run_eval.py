@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import logging
 from pathlib import Path
 
 from triage_voice_eval import (
@@ -35,6 +36,7 @@ _SCENARIOS_PATH = Path(__file__).parent / "scenarios.yaml"
 
 
 async def main(save_path: Path | None) -> None:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     scenario = Scenario.from_yaml(str(_SCENARIOS_PATH))
 
     # Single persona — the SkyCarrier vertical is configured with multiple

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 from collections.abc import Awaitable, Callable
 from datetime import datetime, timezone
@@ -13,6 +14,8 @@ from .core import (
     Scenario,
     TestCase,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class EvalRunner:
@@ -32,7 +35,7 @@ class EvalRunner:
         recorded on that ``CasePersonaResult.error`` and other pairs still run.
 
         The dict returned by ``pipeline_fn`` is not mutated — optional
-        ``_tokens``/``_cost`` keys are read from a shallow copy.
+        ``_tokens``/``_cost``/``_latency_ms`` keys are read from a shallow copy.
         """
         semaphore = asyncio.Semaphore(concurrency)
         results: dict[str, dict[str, CasePersonaResult]] = {}
@@ -44,6 +47,9 @@ class EvalRunner:
                     raw_response = await pipeline_fn(case, persona)
                 except Exception as exc:
                     latency_ms = (time.perf_counter() - t0) * 1000
+                    logger.exception(
+                        "pipeline_fn failed for case=%s persona=%s", case.id, persona.id
+                    )
                     cpr = CasePersonaResult(
                         persona_id=persona.id,
                         response={},
@@ -54,28 +60,29 @@ class EvalRunner:
                     return case.id, persona.id, cpr
                 latency_ms = (time.perf_counter() - t0) * 1000
 
-            # Shallow copy so we don't mutate the caller's dict when
-            # extracting optional _tokens / _cost usage metadata.
-            response = dict(raw_response)
-            tokens = response.pop("_tokens", {})
-            cost = response.pop("_cost", 0.0)
+                # Shallow copy so we don't mutate the caller's dict when
+                # extracting optional _tokens / _cost usage metadata.
+                response = dict(raw_response)
+                tokens = response.pop("_tokens", {})
+                cost = response.pop("_cost", 0.0)
+                response.pop("_latency_ms", None)
 
-            verdicts = []
-            for guard in guards:
-                out = guard.evaluate(case, response)
-                if asyncio.iscoroutine(out):
-                    out = await out
-                verdicts.append(out)
+                verdicts = []
+                for guard in guards:
+                    out = guard.evaluate(case, response)
+                    if asyncio.iscoroutine(out):
+                        out = await out
+                    verdicts.append(out)
 
-            cpr = CasePersonaResult(
-                persona_id=persona.id,
-                response=response,
-                verdicts=verdicts,
-                latency_ms=latency_ms,
-                tokens=tokens,
-                cost=cost,
-            )
-            return case.id, persona.id, cpr
+                cpr = CasePersonaResult(
+                    persona_id=persona.id,
+                    response=response,
+                    verdicts=verdicts,
+                    latency_ms=latency_ms,
+                    tokens=tokens,
+                    cost=cost,
+                )
+                return case.id, persona.id, cpr
 
         tasks = [
             _run_one(case, persona)
