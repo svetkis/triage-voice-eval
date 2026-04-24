@@ -15,7 +15,7 @@ A clear one-sentence description of the bug.
 - [ ] CrisisGuard / JailbreakGuard (verdict logic)
 - [ ] RobustJsonParser
 - [ ] EvalRunner (fan-out / concurrency)
-- [ ] UsageLogger / ReportGenerator / TrendAnalyzer
+- [ ] UsageTracker / ReportGenerator / TrendAnalyzer
 - [ ] Other — explain:
 
 ## Reproduction

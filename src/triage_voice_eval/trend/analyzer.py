@@ -43,17 +43,16 @@ class TrendAnalyzer:
     def __init__(self, runs_dir: str) -> None:
         self.runs_dir = Path(runs_dir)
 
-    def load_runs(self) -> list[tuple[str, RunResult]]:
-        """Load all runs from runs_dir, sorted by ``result.timestamp``.
+    def load_runs_with_stats(self) -> tuple[list[tuple[str, RunResult]], int]:
+        """Load all runs from runs_dir and report how many were skipped.
 
-        Ties (including legacy runs with empty-string timestamps, which are
-        mapped to ``datetime.min`` by RunResult's validator) are broken by
-        directory name for deterministic ordering.
-
-        Corrupted or unreadable result files are skipped with a warning
-        logged to ``triage_voice_eval.trend.analyzer``.
+        Same behavior as :meth:`load_runs`, but additionally returns the count
+        of runs that were skipped due to corrupt or unreadable result files,
+        so callers (e.g. the trend-table generator) can surface that count to
+        users who don't have logging configured.
         """
         runs: list[tuple[str, RunResult]] = []
+        skipped = 0
         for run_dir in self.runs_dir.iterdir():
             result_path = run_dir / "result.json"
             if run_dir.is_dir() and result_path.exists():
@@ -64,12 +63,33 @@ class TrendAnalyzer:
                     runs.append((run_dir.name, run_result))
                 except (OSError, json.JSONDecodeError, ValidationError) as exc:
                     logger.warning("Skipping %s: %s", run_dir.name, exc)
+                    skipped += 1
         runs.sort(key=lambda pair: (pair[1].timestamp, pair[0]))
-        return runs
+        return runs, skipped
 
-    def detect_regressions(self) -> list[Regression]:
-        """Find cases where verdict worsened between consecutive runs."""
-        runs = self.load_runs()
+    def load_runs(self) -> list[tuple[str, RunResult]]:
+        """Load all runs from runs_dir, sorted by ``result.timestamp``.
+
+        Ties (including legacy runs with empty-string timestamps, which are
+        mapped to ``datetime.min`` by RunResult's validator) are broken by
+        directory name for deterministic ordering.
+
+        Corrupted or unreadable result files are skipped with a warning
+        logged to ``triage_voice_eval.trend.analyzer``.
+        """
+        return self.load_runs_with_stats()[0]
+
+    def detect_regressions(
+        self, runs: list[tuple[str, RunResult]] | None = None
+    ) -> list[Regression]:
+        """Find cases where verdict worsened between consecutive runs.
+
+        If ``runs`` is not provided, loads them via :meth:`load_runs`. Callers
+        that already loaded the runs (e.g. :meth:`generate_trend_table`) should
+        pass them in to avoid re-parsing every ``result.json`` twice.
+        """
+        if runs is None:
+            runs = self.load_runs()
         if len(runs) < 2:
             return []
 
@@ -104,13 +124,13 @@ class TrendAnalyzer:
 
     def generate_trend_table(self) -> str:
         """Generate markdown trend table: cases x runs with verdict history."""
-        runs = self.load_runs()
+        runs, skipped = self.load_runs_with_stats()
         if not runs:
             return "# Trend Analysis\n\nNo runs found."
 
         # Collect all regressions for marking.
         regression_set: set[tuple[str, str, str, str]] = set()
-        for r in self.detect_regressions():
+        for r in self.detect_regressions(runs):
             regression_set.add((r.case_id, r.persona_id, r.guard_name, r.current_run))
 
         # Collect all unique (case_id, persona_id, guard_name) tuples.
@@ -125,6 +145,11 @@ class TrendAnalyzer:
         run_names = [name for name, _ in runs]
 
         lines: list[str] = []
+        if skipped > 0:
+            lines.append(
+                f"_{skipped} run(s) skipped due to errors — see warnings._"
+            )
+            lines.append("")
         lines.append("# Trend Analysis")
         lines.append("")
 

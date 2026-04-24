@@ -19,6 +19,8 @@ def _truncate(text: str, max_len: int = 300) -> str:
 
 def _extract_response_text(response: dict) -> str:
     """Extract displayable text from the response dict."""
+    if "response_text" in response:
+        return str(response["response_text"])
     if "content" in response:
         return str(response["content"])
     if "text" in response:

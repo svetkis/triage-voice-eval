@@ -147,6 +147,20 @@ class TestScenarioFromYaml:
         assert scenario.id == "crisis"
         assert len(scenario.test_cases) == 1
 
+    def test_scenario_from_yaml_raises_on_duplicate_ids(self, tmp_path: Path):
+        """Two test_cases sharing an id must raise, not silently overwrite."""
+        data = {
+            "id": "dup",
+            "test_cases": [
+                {"id": "c1", "input": "first"},
+                {"id": "c1", "input": "second"},
+            ],
+        }
+        f = tmp_path / "dup.yaml"
+        f.write_text(yaml.dump(data))
+        with pytest.raises(ValueError, match="duplicate"):
+            Scenario.from_yaml(str(f))
+
 
 class TestCasePersonaResult:
     def test_defaults(self):
