@@ -482,7 +482,12 @@ Each `TestCase` has:
 ## Links
 
 - [triage-and-voice](https://github.com/svetkis/triage-and-voice) — reference implementation of the pattern this eval framework is designed for
-- [Why your LLM product hallucinates the one thing it shouldn't](https://substack.com/home/post/p-193325003) — article explaining the problem and pattern
+- **Deep dive (Russian):** [Why your LLM product hallucinates the one thing it shouldn't](https://habr.com/ru/articles/1019592/) — original pattern introduction
+- **English version:** [Substack](https://lanaapps.substack.com/p/why-your-llm-product-hallucinates)
+- **Follow-up (Russian):** [Почему ваш LLM-бот врёт клиентам — и паттерн, который это чинит](https://habr.com/ru/articles/1027080/)
+- **English version:** [Why Your LLM Support Bot Is Working Against You](https://lanaapps.substack.com/p/why-your-llm-support-bot-is-working)
+- **Author:** [Svetlana Meleshkina](https://github.com/svetkis)
+- **Consulting:** if you're considering this pattern for your product, reach out on Telegram [@svetkis](https://t.me/svetkis) — LLM-bot architecture reviews and audits.
 
 ---
 
